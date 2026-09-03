@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import express from "express";
 import path from "node:path";
 import { type JobState, isCompletedJobWithBuffer, makeRenderQueue } from "./render-queue";
+import { generateQuizQuestions } from "./generate-question";
 
 dotenv.config();
 
@@ -42,6 +43,25 @@ function setupApp({ remotionBundleUrl }: { remotionBundleUrl: string }) {
     res.json({ jobId });
   });
 
+  // New endpoint: auto-generate questions with AI and render them
+  app.post("/generate-and-render", async (req, res) => {
+    const { count = 30, chatId } = req.body;
+
+    if (!chatId) {
+      res.status(400).json({ message: "Missing chatId is required" });
+      return;
+    }
+
+    try {
+      const quizData = await generateQuizQuestions(count);
+      const jobId = queue.createJob({ quizData, chatId });
+      res.json({ jobId, questionCount: quizData.questions.length });
+    } catch (err) {
+      const error = err as Error;
+      res.status(500).json({ message: "Failed to generate questions", error: error.message });
+    }
+  });
+
   // Endpoint to get a job status
   app.get("/renders/:jobId", (req, res) => {
     const jobId = req.params.jobId;
@@ -69,7 +89,8 @@ function setupApp({ remotionBundleUrl }: { remotionBundleUrl: string }) {
         progress: job.status === 'in-progress' ? job.progress : undefined,
       });
     } else {
-      console.warn(`Unexpected job status in GET /renders/:jobId: ${job.status}`);
+      const unexpectedJob = job as JobState;
+      console.warn(`Unexpected job status in GET /renders/:jobId: ${unexpectedJob.status}`);
       res.status(500).json({ message: "Internal server error: Unexpected job state" });
     }
   });
