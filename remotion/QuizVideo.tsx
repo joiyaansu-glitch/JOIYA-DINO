@@ -2,6 +2,7 @@ import type React from "react";
 import {
 	AbsoluteFill,
 	Audio,
+	Img,
 	Sequence,
 	interpolate,
 	spring,
@@ -118,20 +119,9 @@ const QuizQuestion: React.FC<{
 			/>
 			{/* --- End Countdown Audio --- */}
 
-			{/* --- Correct Answer Audio Removed --- */}
-			{/* {showCorrect && (
-					<Audio
-						src={staticFile("correct_answer.mp3")}
-						startFrom={REVEAL_AT} // This startFrom might not be needed if mounting is enough
-						endAt={290} // You might need to adjust based on audio length
-						volume={0.7}
-					/>
-				)} */}
-			{/* --- End Correct Answer Audio --- */}
-
 			{/* New Countdown Component Placement */}
 			{/* Place the countdown within a Sequence to control its timing */}
-			<Sequence from={0} durationInFrames={REVEAL_AT + 1}> { /* Show until reveal happens */ }
+			<Sequence from={0} durationInFrames={REVEAL_AT + 1}>
 				<AbsoluteFill
 					style={{
 						// Position the countdown, adjust top/left/transform as needed
@@ -147,7 +137,7 @@ const QuizQuestion: React.FC<{
 					<Countdown durationInFrames={REVEAL_AT} />
 				</AbsoluteFill>
 			</Sequence>
-			{/* End New Countdown Component */} 
+			{/* End New Countdown Component */}
 
 			{/* Main Content Container for Centering and Slide Out */}
 			<div
@@ -231,14 +221,24 @@ export const QuizVideo: React.FC<z.infer<typeof quizCompSchema>> = ({
 
 	return (
 		<AbsoluteFill style={{ background: COLOR.backgroundGradient }}>
+			<Img
+				src={staticFile("mascot.png")}
+				style={{
+					position: "absolute",
+					top: 40,
+					right: 40,
+					width: 150,
+					zIndex: 20,
+				}}
+			/>
 			{/* --- Play Intro Text and Avatar First --- */}
 			<Sequence from={0} durationInFrames={introDuration}>
 				{/* Add Intro Audio */}
 				<Audio src={staticFile("intro.mp3")} />
-                {/* Render Intro Text Component */}
-                <IntroText text="Welcome to your Remotion template on Railway!" />
-                {/* Render Hero Logo Component */}
-                <HeroLogo />
+				{/* Render Intro Text Component */}
+				<IntroText text="Welcome to your Remotion template on Railway!" />
+				{/* Render Hero Logo Component */}
+				<HeroLogo />
 			</Sequence>
 
 			{/* --- Then Play Questions --- */}
